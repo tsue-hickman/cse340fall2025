@@ -28,17 +28,16 @@ app.get("/", function(req,res) {
   res.render("index", {title: "Home"})
 })
 
-
 /* ***********************
  * Local Server Information
  * Values from .env (environment) file
  *************************/
-const HOST = 'localhost'
-const PORT = 3000
+const port = process.env.PORT
+const host = process.env.HOST
 
 /* ***********************
  * Log statement to confirm server operation
  *************************/
-app.listen(PORT, () => {
-  console.log(`trial app listening on ${HOST}:${PORT}`)
+app.listen(port, () => {
+  console.log(`app listening on ${host}:${port}`)
 })
