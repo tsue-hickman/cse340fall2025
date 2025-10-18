@@ -9,4 +9,7 @@ router.get("/type/:classificationId", invController.buildByClassificationId);
 // Route to build inventory item detail view
 router.get("/detail/:invId", invController.buildByInventoryId);
 
+// Route to trigger intentional error (for testing)
+router.get("/trigger-error", invController.triggerError);
+
 module.exports = router;
