@@ -36,4 +36,11 @@ invCont.buildByInventoryId = errorHandler.errorHandler(async function (req, res,
   })
 })
 
+/* ***************************
+ *  Intentionally trigger a 500 error
+ * ************************** */
+invCont.triggerError = errorHandler.errorHandler(async function (req, res, next) {
+  throw new Error('Intentional 500 error triggered for testing purposes')
+})
+
 module.exports = invCont
