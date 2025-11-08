@@ -15,21 +15,16 @@ const inventoryRoute = require("./routes/inventoryRoute")
 const errorHandler = require("./middleware/errorHandler")
 const session = require("express-session")
 const pool = require('./database/')
-
-/* ***********************
- * View Engine and Templates
- *************************/
-app.set("view engine", "ejs")
-app.use(expressLayouts)
-app.set("layout", "./layouts/layout")
+const pgSession = require('connect-pg-simple')(session)
 
 /* ***********************
  * Middleware
  * ************************/
 app.use(session({
-  store: new (require('connect-pg-simple')(session))({
-    createTableIfMissing: true,
-    pool,
+  store: new pgSession({
+    pool: pool,
+    tableName: 'session',
+    createTableIfMissing: true
   }),
   secret: process.env.SESSION_SECRET,
   resave: true,
@@ -44,7 +39,17 @@ app.use(function(req, res, next){
   next()
 })
 
-app.use(require('body-parser').urlencoded({ extended: true }))
+// Body parser middleware
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+/* ***********************
+ * View Engine and Templates
+ *************************/
+app.set("view engine", "ejs")
+app.use(expressLayouts)
+app.set("layout", "./layouts/layout")
+
 
 /* ***********************
  * Routes
@@ -54,8 +59,6 @@ app.use(static)
 app.get("/", baseController.buildHome)
 // Inventory routes
 app.use("/inv", inventoryRoute)
-// Account routes
-app.use("/account", require("./routes/accountRoute"))
 
 // File Not Found Route - must be last route
 app.use(async (req, res, next) => {
