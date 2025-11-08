@@ -11,9 +11,10 @@ const errorHandler = fn => (req, res, next) =>
  * Place after all other middleware
  *************************** */
 const handleErrors = async (err, req, res, next) => {
-  let nav = await require("../utilities/").getNav()
+  let nav = '<ul><li><a href="/">Home</a></li></ul>' // Simple fallback nav
   console.error(`Error at: "${req.originalUrl}": ${err.message}`)
   
+  let message
   if(err.status == 404) {
     message = err.message
   } else {

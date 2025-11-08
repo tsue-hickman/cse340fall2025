@@ -1,5 +1,6 @@
 const invModel = require("../models/inventory-model")
 const Util = {}
+const errorHandler = require("../middleware/errorHandler") 
 
 /* ************************
  * Constructs the nav HTML unordered list
@@ -75,5 +76,12 @@ Util.buildDetailView = async function(vehicle){
   detail += '</div>'
   return detail
 }
+
+/* ****************************************
+ * Middleware For Handling Errors
+ * Wrap other function in this for 
+ * General Error Handling
+ **************************************** */
+Util.handleErrors = errorHandler.errorHandler
 
 module.exports = Util
