@@ -12,32 +12,40 @@ const app = express()
 const static = require("./routes/static")
 const baseController = require("./controllers/baseController")
 const inventoryRoute = require("./routes/inventoryRoute")
+const accountRoute = require("./routes/accountRoute")
 const errorHandler = require("./middleware/errorHandler")
 const session = require("express-session")
 const pool = require('./database/')
-const pgSession = require('connect-pg-simple')(session)
+const flash = require("connect-flash")
+const cookieParser = require("cookie-parser")
+const utilities = require("./utilities/")
 
 /* ***********************
  * Middleware
  * ************************/
 app.use(session({
-  store: new pgSession({
-    pool: pool,
-    tableName: 'session',
-    createTableIfMissing: true
+  store: new (require('connect-pg-simple')(session))({
+    createTableIfMissing: true,
+    pool,
   }),
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'secret',
   resave: true,
   saveUninitialized: true,
   name: 'sessionId',
 }))
 
 // Express Messages Middleware
-app.use(require('connect-flash')())
+app.use(flash())
 app.use(function(req, res, next){
   res.locals.messages = require('express-messages')(req, res)
   next()
 })
+
+// Cookie Parser Middleware
+app.use(cookieParser())
+
+// JWT Token Check Middleware
+app.use(utilities.checkJWTToken)
 
 // Body parser middleware
 app.use(express.json())
@@ -59,6 +67,8 @@ app.use(static)
 app.get("/", baseController.buildHome)
 // Inventory routes
 app.use("/inv", inventoryRoute)
+// Account routes
+app.use("/account", accountRoute)
 
 // File Not Found Route - must be last route
 app.use(async (req, res, next) => {
