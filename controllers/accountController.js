@@ -1,13 +1,13 @@
 const utilities = require("../utilities/")
 const accountModel = require("../models/account-model")
 const bcrypt = require("bcryptjs")
-
-const accountCont = {}
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
 
 /* ****************************************
 *  Deliver login view
-**************************************** */
-accountCont.buildLogin = async function (req, res, next) {
+* *************************************** */
+async function buildLogin(req, res, next) {
   let nav = await utilities.getNav()
   res.render("account/login", {
     title: "Login",
@@ -18,8 +18,8 @@ accountCont.buildLogin = async function (req, res, next) {
 
 /* ****************************************
 *  Deliver registration view
-**************************************** */
-accountCont.buildRegister = async function (req, res, next) {
+* *************************************** */
+async function buildRegister(req, res, next) {
   let nav = await utilities.getNav()
   res.render("account/register", {
     title: "Register",
@@ -30,14 +30,15 @@ accountCont.buildRegister = async function (req, res, next) {
 
 /* ****************************************
 *  Process Registration
-**************************************** */
-accountCont.registerAccount = async function (req, res) {
+* *************************************** */
+async function registerAccount(req, res) {
   let nav = await utilities.getNav()
   const { account_firstname, account_lastname, account_email, account_password } = req.body
 
   // Hash the password before storing
   let hashedPassword
   try {
+    // regular password and cost (salt is generated automatically)
     hashedPassword = await bcrypt.hashSync(account_password, 10)
   } catch (error) {
     req.flash("notice", 'Sorry, there was an error processing the registration.')
@@ -78,7 +79,7 @@ accountCont.registerAccount = async function (req, res) {
 /* ****************************************
  *  Process login request
  * ************************************ */
-accountCont.accountLogin = async function (req, res) {
+async function accountLogin(req, res) {
   let nav = await utilities.getNav()
   const { account_email, account_password } = req.body
   const accountData = await accountModel.getAccountByEmail(account_email)
@@ -95,7 +96,12 @@ accountCont.accountLogin = async function (req, res) {
   try {
     if (await bcrypt.compare(account_password, accountData.account_password)) {
       delete accountData.account_password
-      req.flash("notice", "You're logged in!")
+      const accessToken = jwt.sign(accountData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: 3600 * 1000 })
+      if(process.env.NODE_ENV === 'development') {
+        res.cookie("jwt", accessToken, { httpOnly: true, maxAge: 3600 * 1000 })
+      } else {
+        res.cookie("jwt", accessToken, { httpOnly: true, secure: true, maxAge: 3600 * 1000 })
+      }
       return res.redirect("/account/")
     } else {
       req.flash("notice", "Please check your credentials and try again.")
@@ -111,4 +117,16 @@ accountCont.accountLogin = async function (req, res) {
   }
 }
 
-module.exports = accountCont 
+/* ****************************************
+*  Deliver account management view
+* *************************************** */
+async function buildManagement(req, res, next) {
+  let nav = await utilities.getNav()
+  res.render("account/management", {
+    title: "Account Management",
+    nav,
+    errors: null,
+  })
+}
+
+module.exports = { buildLogin, buildRegister, registerAccount, accountLogin, buildManagement }
