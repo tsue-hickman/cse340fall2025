@@ -1,6 +1,7 @@
 const invModel = require("../models/inventory-model")
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
+
 const Util = {}
 
 /* ************************
@@ -37,7 +38,7 @@ Util.buildClassificationGrid = async function(data){
       grid += '<li>'
       grid +=  '<a href="../../inv/detail/'+ vehicle.inv_id 
       + '" title="View ' + vehicle.inv_make + ' '+ vehicle.inv_model 
-      + 'details"><img src="' + vehicle.inv_thumbnail 
+      + ' details"><img src="' + vehicle.inv_thumbnail 
       +'" alt="Image of '+ vehicle.inv_make + ' ' + vehicle.inv_model 
       +' on CSE Motors" /></a>'
       grid += '<div class="namePrice">'
@@ -124,22 +125,21 @@ Util.checkJWTToken = (req, res, next) => {
 }
 
 /* ****************************************
- * Check Login
+ * Check Login - Protect routes that require authentication
  * ************************************ */
 Util.checkLogin = (req, res, next) => {
- if (res.locals.loggedin) {
-  next()
- } else {
-  req.flash("notice", "Please log in.")
-  return res.redirect("/account/login")
- }
+  if (res.locals.loggedin) {
+    next()
+  } else {
+    req.flash("notice", "Please log in.")
+    return res.redirect("/account/login")
+  }
 }
 
 /* ****************************************
  * Middleware For Handling Errors
- * Wrap other function in this for 
- * General Error Handling
- **************************************** */
+ * Wrap other function in this for General Error Handling
+ * **************************************** */
 Util.handleErrors = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
 
 module.exports = Util
