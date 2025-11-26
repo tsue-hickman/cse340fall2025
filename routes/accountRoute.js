@@ -1,28 +1,33 @@
+// Needed Resources 
 const express = require("express")
-const router = new express.Router()
+const router = new express.Router() 
 const accountController = require("../controllers/accountController")
 const utilities = require("../utilities")
 const regValidate = require('../utilities/account-validation')
-const { errorHandler } = require("../middleware/errorHandler")
 
 // Route to build login view
-router.get("/login", errorHandler(accountController.buildLogin))
+router.get("/login", utilities.handleErrors(accountController.buildLogin))
 
 // Route to build registration view
-router.get("/register", errorHandler(accountController.buildRegister))
+router.get("/register", utilities.handleErrors(accountController.buildRegister))
 
-// Process registration
+// Process the registration data
 router.post(
   "/register",
   regValidate.registrationRules(),
   regValidate.checkRegData,
-  errorHandler(accountController.registerAccount)
+  utilities.handleErrors(accountController.registerAccount)
 )
 
-// Process login attempt
+// Process the login request
 router.post(
   "/login",
-  errorHandler(accountController.accountLogin)
+  regValidate.loginRules(),
+  regValidate.checkLoginData,
+  utilities.handleErrors(accountController.accountLogin)
 )
+
+// Default logged-in route
+router.get("/", utilities.checkLogin, utilities.handleErrors(accountController.buildManagement))
 
 module.exports = router

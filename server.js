@@ -41,36 +41,38 @@ app.use(function(req, res, next){
   next()
 })
 
-// Cookie Parser Middleware
+// Cookie parser - added for JWT cookies
 app.use(cookieParser())
 
-// JWT Token Check Middleware
+// Token validation - checks if JWT cookie is valid
 app.use(utilities.checkJWTToken)
 
 // Body parser middleware
 app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
 /* ***********************
  * View Engine and Templates
  *************************/
 app.set("view engine", "ejs")
 app.use(expressLayouts)
-app.set("layout", "./layouts/layout")
-
+app.set("layout", "./layouts/layout") // not at views root
 
 /* ***********************
  * Routes
  *************************/
 app.use(static)
-//Index Route
+
+// Index route
 app.get("/", baseController.buildHome)
+
 // Inventory routes
 app.use("/inv", inventoryRoute)
-// Account routes
+
+// Account routes - added for login/register
 app.use("/account", accountRoute)
 
-// File Not Found Route - must be last route
+// File Not Found Route - must be last route in list
 app.use(async (req, res, next) => {
   next({status: 404, message: 'Sorry, we appear to have lost that page.'})
 })
@@ -91,6 +93,7 @@ const host = process.env.HOST || 'localhost'
 /* ***********************
  * Log statement to confirm server operation
  *************************/
+
 app.listen(port, () => {
   console.log(`app listening on ${host}:${port}`)
 })

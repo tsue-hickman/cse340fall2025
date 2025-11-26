@@ -12,26 +12,26 @@ validate.registrationRules = () => {
     body("account_firstname")
       .trim()
       .isLength({ min: 1 })
-      .withMessage("Please provide a first name."),
+      .withMessage("Please provide a first name."), // on error this message is sent.
 
     // lastname is required and must be string
     body("account_lastname")
       .trim()
       .isLength({ min: 2 })
-      .withMessage("Please provide a last name."),
+      .withMessage("Please provide a last name."), // on error this message is sent.
 
     // valid email is required and cannot already exist in the DB
     body("account_email")
-      .trim()
-      .isEmail()
-      .normalizeEmail()
-      .withMessage("A valid email is required.")
-      .custom(async (account_email) => {
-        const emailExists = await accountModel.checkExistingEmail(account_email)
-        if (emailExists){
-          throw new Error("Email exists. Please log in or use different email")
-        }
-      }),
+    .trim()
+    .isEmail()
+    .normalizeEmail() // refer to validator.js docs
+    .withMessage("A valid email is required.")
+    .custom(async (account_email) => {
+      const emailExists = await accountModel.checkExistingEmail(account_email)
+      if (emailExists){
+        throw new Error("Email exists. Please log in or use different email")
+      }
+    }),
 
     // password is required and must be strong password
     body("account_password")
@@ -76,10 +76,10 @@ validate.loginRules = () => {
   return [
     // valid email is required
     body("account_email")
-      .trim()
-      .isEmail()
-      .normalizeEmail()
-      .withMessage("A valid email is required."),
+    .trim()
+    .isEmail()
+    .normalizeEmail() // refer to validator.js docs
+    .withMessage("A valid email is required."),
 
     // password is required
     body("account_password")
